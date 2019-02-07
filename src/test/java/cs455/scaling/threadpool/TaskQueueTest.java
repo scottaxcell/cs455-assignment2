@@ -44,21 +44,21 @@ public class TaskQueueTest {
                 catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                tq.put("Object 1");
+                tq.put(new Task());
                 try {
                     Thread.sleep(2000);
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                tq.put("Object 2");
+                tq.put(new Task());
                 try {
                     Thread.sleep(3000);
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                tq.put("Object 3");
+                tq.put(new Task());
             }
         };
         Thread putterThread = new Thread(putter);

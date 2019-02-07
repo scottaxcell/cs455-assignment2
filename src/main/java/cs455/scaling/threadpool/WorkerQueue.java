@@ -2,10 +2,10 @@ package cs455.scaling.threadpool;
 
 import java.util.LinkedList;
 
-public class TaskQueue {
-    LinkedList<Task> queue = new LinkedList<>();
+public class WorkerQueue {
+    LinkedList<Worker> queue = new LinkedList<>();
 
-    public synchronized Task take() {
+    public synchronized Worker take() {
         while (queue.isEmpty()) {
             try {
                 wait();
@@ -17,8 +17,8 @@ public class TaskQueue {
         return queue.pollFirst();
     }
 
-    public synchronized void put(Task task) {
-        queue.addLast(task);
+    public synchronized void put(Worker worker) {
+        queue.addLast(worker);
         notify();
     }
 }
