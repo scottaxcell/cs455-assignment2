@@ -27,9 +27,13 @@ public class Server {
         this.threadPoolSize = threadPoolSize;
         this.batchSize = batchSize;
         this.batchTime = batchTime;
+        threadPool = new ThreadPool(threadPoolSize);
+        threadPool.start();
+        initServerSocketChannel();
+        handleSelectedKeys();
     }
 
-    private void select() {
+    private void handleSelectedKeys() {
         while (true) {
             try {
                 if (selector.selectNow() == 0)
