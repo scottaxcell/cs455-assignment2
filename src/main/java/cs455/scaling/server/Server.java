@@ -1,5 +1,6 @@
 package cs455.scaling.server;
 
+import cs455.scaling.threadpool.Task;
 import cs455.scaling.threadpool.ThreadPool;
 import cs455.scaling.util.Utils;
 
@@ -9,22 +10,23 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 
 public class Server {
     private final int port;
-    private final int numThreads;
+    private final int threadPoolSize;
+    private final int batchSize;
+    private final int batchTime;
     private ServerSocketChannel serverSocketChannel;
     private Selector selector;
     private SelectionKey selectionKey;
     private ThreadPool threadPool;
 
-    public Server(int port, int numThreads) {
+    public Server(int port, int threadPoolSize, int batchSize, int batchTime) {
         this.port = port;
-        this.numThreads = numThreads;
-        threadPool = new ThreadPool(numThreads);
-        threadPool.start();
-        initServerSocketChannel();
-        select();
+        this.threadPoolSize = threadPoolSize;
+        this.batchSize = batchSize;
+        this.batchTime = batchTime;
     }
 
     private void select() {
@@ -42,8 +44,6 @@ public class Server {
                         handleWritableSelectionKey(selectionKey);
                     else if (selectionKey.isAcceptable())
                         handleAcceptableSelectionKey(selectionKey);
-                    else if (selectionKey.isConnectable())
-                        handleConnectableSelectionKey(selectionKey);
                 }
             }
             catch (IOException e) {
@@ -52,12 +52,22 @@ public class Server {
         }
     }
 
-    private void handleConnectableSelectionKey(SelectionKey selectionKey) {
-        
-    }
-
     private void handleAcceptableSelectionKey(SelectionKey selectionKey) {
-
+        threadPool.execute(new Task() {
+            @Override
+            public void run() {
+                try {
+                    ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectionKey.channel();
+                    SocketChannel socketChannel = serverSocketChannel.accept();
+                    socketChannel.configureBlocking(false);
+                    socketChannel.register(selector, SelectionKey.OP_READ);
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+                super.run();
+            }
+        });
     }
 
     private void handleWritableSelectionKey(SelectionKey selectionKey) {
@@ -81,8 +91,15 @@ public class Server {
         }
     }
 
+    private static void printUsageAndExit() {
+        Utils.out("USAGE: java cs455.scaling.server.Server portnum thread-pool-size batch-size batch-time\n");
+        System.exit(-1);
+    }
+
     public static void main(String[] args) {
-        // TODO handle args
-        new Server(50731, 4);
+        if (args.length != 4)
+            printUsageAndExit();
+
+        new Server(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]));
     }
 }
