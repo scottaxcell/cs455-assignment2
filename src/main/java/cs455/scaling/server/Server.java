@@ -7,10 +7,13 @@ import cs455.scaling.util.Utils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Set;
 
 public class Server {
     private final int port;
@@ -39,15 +42,20 @@ public class Server {
                 if (selector.selectNow() == 0)
                     continue;
 
-                for (SelectionKey selectionKey : selector.selectedKeys()) {
-                    if (!selectionKey.isValid())
+                Iterator<SelectionKey> selectionKeyIterator = selector.selectedKeys().iterator();
+                while (selectionKeyIterator.hasNext()) {
+                    SelectionKey selectionKey = selectionKeyIterator.next();
+                    if (!selectionKey.isValid()) {
+                        selectionKeyIterator.remove();
                         continue;
+                    }
                     if (selectionKey.isReadable())
                         handleReadableSelectionKey(selectionKey);
                     else if (selectionKey.isWritable())
                         handleWritableSelectionKey(selectionKey);
                     else if (selectionKey.isAcceptable())
                         handleAcceptableSelectionKey(selectionKey);
+                    selectionKeyIterator.remove();
                 }
             }
             catch (IOException e) {
@@ -57,9 +65,10 @@ public class Server {
     }
 
     private void handleAcceptableSelectionKey(SelectionKey selectionKey) {
-        threadPool.execute(new Task() {
-            @Override
-            public void run() {
+        Utils.debug("Server.handleAcceptableSelectionKey");
+//        threadPool.execute(new Task() {
+//            @Override
+//            public void run() {
                 try {
                     ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectionKey.channel();
                     SocketChannel socketChannel = serverSocketChannel.accept();
@@ -69,17 +78,39 @@ public class Server {
                 catch (IOException e) {
                     e.printStackTrace();
                 }
-                super.run();
-            }
-        });
+//                super.run();
+//            }
+//        });
     }
 
     private void handleWritableSelectionKey(SelectionKey selectionKey) {
-
+        Utils.debug("Server.handleWritableSelectionKey");
     }
 
     private void handleReadableSelectionKey(SelectionKey selectionKey) {
+        Utils.debug("Server.handleReadableSelectionKey");
+//        threadPool.execute(new Task() {
+//            @Override
+//            public void run() {
+                SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+                ByteBuffer dst = ByteBuffer.allocateDirect(Utils.EIGHT_K);
+                try {
+                    int numBytesRead = socketChannel.read(dst);
+                    dst.flip();
+                    byte[] bytes = new byte[dst.remaining()];
+                    dst.get(bytes);
+                    String hashCode = Utils.createSha1FromBytes(bytes);
+                    Utils.debug(String.format("hashCode = %s", hashCode));
 
+                    ByteBuffer src = ByteBuffer.wrap(hashCode.getBytes());
+                    socketChannel.write(src);
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+//                super.run();
+//            }
+//        });
     }
 
     private void initServerSocketChannel() {

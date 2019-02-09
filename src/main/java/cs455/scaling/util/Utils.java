@@ -3,8 +3,12 @@ package cs455.scaling.util;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Utils {
+    public static final int EIGHT_K = 8129;
+    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss.S");
     private static boolean debug = true;
 
     public static void out(Object o) {
@@ -17,14 +21,14 @@ public class Utils {
 
     public static void debug(Object o) {
         if (debug)
-            System.out.println("DEBUG: " + o);
+            System.out.println(String.format("DEBUG: [%s] %s", simpleDateFormat.format(new Date()), o));
     }
 
     public static void error(Object o) {
         System.err.println("\nERROR: " + o);
     }
 
-    public String createSha1FromBytes(byte[] data) {
+    public static String createSha1FromBytes(byte[] data) {
         MessageDigest digest = null;
         try {
             digest = MessageDigest.getInstance("SHA1");
