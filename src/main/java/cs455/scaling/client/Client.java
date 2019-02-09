@@ -31,21 +31,20 @@ public class Client {
     private void handleSelectedKeys() {
         while (true) {
             try {
-                if (selector.selectNow() == 0)
-                    continue;
+//                if (selector.selectNow() == 0)
+//                    continue;
+                selector.select();
 
                 Iterator<SelectionKey> selectionKeyIterator = selector.selectedKeys().iterator();
                 while (selectionKeyIterator.hasNext()) {
                     SelectionKey selectionKey = selectionKeyIterator.next();
-                    if (!selectionKey.isValid()) {
-                        selectionKeyIterator.remove();
+                    selectionKeyIterator.remove();
+                    if (!selectionKey.isValid())
                         continue;
-                    }
                     if (selectionKey.isReadable())
                         handleReadableSelectionKey(selectionKey);
                     else if (selectionKey.isConnectable())
                         handleConnectableSelectionKey(selectionKey);
-                    selectionKeyIterator.remove();
                 }
             }
             catch (IOException e) {
@@ -56,23 +55,26 @@ public class Client {
 
     private void handleConnectableSelectionKey(SelectionKey selectionKey) {
         Utils.debug("Client.handleConnectableSelectionKey");
-        Runnable runnable = () -> {
-            SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-            try {
-                socketChannel.finishConnect();
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
+        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+        try {
+            socketChannel.finishConnect();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        selectionKey.interestOps(SelectionKey.OP_WRITE);
 
+        Runnable runnable = () -> {
             Random random = new Random();
             byte[] randomBytes = new byte[Utils.EIGHT_K];
 
-//            while (!Thread.currentThread().isInterrupted()) {
+            while (!Thread.currentThread().isInterrupted()) {
+                selectionKey.interestOps(SelectionKey.OP_WRITE);
+
                 random.nextBytes(randomBytes);
                 String hashCode = Utils.createSha1FromBytes(randomBytes);
-//                hashCodes.put(Utils.createSha1FromBytes(randomBytes));
                 Utils.debug(String.format("hashCode = %s", hashCode));
+                hashCodes.put(Utils.createSha1FromBytes(randomBytes));
                 ByteBuffer src = ByteBuffer.wrap(randomBytes);
                 try {
                     socketChannel.write(src);
@@ -80,6 +82,7 @@ public class Client {
                 }
                 catch (IOException e) {
                     e.printStackTrace();
+                    System.exit(-1);
                 }
                 try {
                     // TODO enable messageRate
@@ -89,7 +92,7 @@ public class Client {
                 catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-//            }
+            }
         };
         Thread thread = new Thread(runnable);
         thread.start();
@@ -98,6 +101,24 @@ public class Client {
     private void handleReadableSelectionKey(SelectionKey selectionKey) {
         // TODO read hashcode from server and remove from list of saved hashcodes
         Utils.debug("Client.handleReadableSelectionKey");
+        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+        ByteBuffer dst = ByteBuffer.allocateDirect(Utils.EIGHT_K);
+        try {
+            socketChannel.read(dst);
+            dst.flip();
+            byte[] bytes = new byte[dst.remaining()];
+            dst.get(bytes);
+            String hashCode = Utils.createSha1FromBytes(bytes);
+            Utils.debug(String.format("hashCode = %s", hashCode));
+            hashCodes.remove(hashCode);
+
+            ByteBuffer src = ByteBuffer.wrap(hashCode.getBytes());
+            socketChannel.write(src);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
 
     private void connectToServer() {
@@ -107,7 +128,8 @@ public class Client {
             selectionKey = socketChannel.register(selector = Selector.open(), SelectionKey.OP_CONNECT);
             socketChannel.connect(new InetSocketAddress(serverHost, serverPort));
             Utils.info(String.format("Connected to server %s:%d", socketChannel.socket().getInetAddress().getCanonicalHostName(), serverPort));
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }

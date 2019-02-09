@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class Utils {
     public static final int EIGHT_K = 8129;
-    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss.S");
+    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.S");
     private static boolean debug = true;
 
     public static void out(Object o) {
@@ -21,7 +21,7 @@ public class Utils {
 
     public static void debug(Object o) {
         if (debug)
-            System.out.println(String.format("DEBUG: [%s] %s", simpleDateFormat.format(new Date()), o));
+            System.out.println(String.format("DEBUG: [%s] %s", SIMPLE_DATE_FORMAT.format(new Date()), o));
     }
 
     public static void error(Object o) {

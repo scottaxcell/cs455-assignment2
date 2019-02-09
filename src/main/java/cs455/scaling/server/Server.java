@@ -13,7 +13,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.Set;
 
 public class Server {
     private final int port;
@@ -39,23 +38,22 @@ public class Server {
     private void handleSelectedKeys() {
         while (true) {
             try {
-                if (selector.selectNow() == 0)
-                    continue;
+//                if (selector.selectNow() == 0)
+//                    continue;
+                selector.select(); // blocks until a channel is ready
 
                 Iterator<SelectionKey> selectionKeyIterator = selector.selectedKeys().iterator();
                 while (selectionKeyIterator.hasNext()) {
                     SelectionKey selectionKey = selectionKeyIterator.next();
-                    if (!selectionKey.isValid()) {
-                        selectionKeyIterator.remove();
+                    selectionKeyIterator.remove();
+                    if (!selectionKey.isValid())
                         continue;
-                    }
                     if (selectionKey.isReadable())
                         handleReadableSelectionKey(selectionKey);
                     else if (selectionKey.isWritable())
                         handleWritableSelectionKey(selectionKey);
                     else if (selectionKey.isAcceptable())
                         handleAcceptableSelectionKey(selectionKey);
-                    selectionKeyIterator.remove();
                 }
             }
             catch (IOException e) {
@@ -66,21 +64,15 @@ public class Server {
 
     private void handleAcceptableSelectionKey(SelectionKey selectionKey) {
         Utils.debug("Server.handleAcceptableSelectionKey");
-//        threadPool.execute(new Task() {
-//            @Override
-//            public void run() {
-                try {
-                    ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectionKey.channel();
-                    SocketChannel socketChannel = serverSocketChannel.accept();
-                    socketChannel.configureBlocking(false);
-                    socketChannel.register(selector, SelectionKey.OP_READ);
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
-//                super.run();
-//            }
-//        });
+        try {
+            ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectionKey.channel();
+            SocketChannel socketChannel = serverSocketChannel.accept();
+            socketChannel.configureBlocking(false);
+            socketChannel.register(selector, SelectionKey.OP_READ);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void handleWritableSelectionKey(SelectionKey selectionKey) {
@@ -89,9 +81,9 @@ public class Server {
 
     private void handleReadableSelectionKey(SelectionKey selectionKey) {
         Utils.debug("Server.handleReadableSelectionKey");
-//        threadPool.execute(new Task() {
-//            @Override
-//            public void run() {
+        threadPool.execute(new Task() {
+            @Override
+            public void run() {
                 SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
                 ByteBuffer dst = ByteBuffer.allocateDirect(Utils.EIGHT_K);
                 try {
@@ -107,10 +99,11 @@ public class Server {
                 }
                 catch (IOException e) {
                     e.printStackTrace();
+                    System.exit(-1);
                 }
-//                super.run();
-//            }
-//        });
+                super.run();
+            }
+        });
     }
 
     private void initServerSocketChannel() {
