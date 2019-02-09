@@ -17,12 +17,12 @@ public class TaskQueue {
             }
         }
         Task task = queue.pollFirst();
-        Utils.debug(String.format("%s removed from taskQueue; %d tasks in queue", task, queue.size()));
+//        Utils.debug(String.format("%s removed from taskQueue; %d tasks in queue", task, queue.size()));
         return task;
     }
 
     public synchronized void put(Task task) {
-        Utils.debug(String.format("%s added to taskQueue; %d tasks in queue", task, queue.size()));
+//        Utils.debug(String.format("%s added to taskQueue; %d tasks in queue", task, queue.size()));
         queue.addLast(task);
         notify();
     }

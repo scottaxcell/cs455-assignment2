@@ -17,12 +17,12 @@ public class WorkerQueue {
             }
         }
         Worker worker = queue.pollFirst();
-        Utils.debug(String.format("%s removed from workerQueue; %d workers in queue", worker, queue.size()));
+//        Utils.debug(String.format("%s removed from workerQueue; %d workers in queue", worker, queue.size()));
         return worker;
     }
 
     public synchronized void put(Worker worker) {
-        Utils.debug(String.format("%s added to workerQueue; %d workers in queue", worker, queue.size()));
+//        Utils.debug(String.format("%s added to workerQueue; %d workers in queue", worker, queue.size()));
         queue.addLast(worker);
         notify();
     }

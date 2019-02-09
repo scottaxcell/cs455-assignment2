@@ -7,7 +7,6 @@ import cs455.scaling.util.Utils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -76,7 +75,7 @@ public class Server {
     }
 
     private void handleWritableSelectionKey(SelectionKey selectionKey) {
-        Utils.debug("Server.handleWritableSelectionKey");
+//        Utils.debug("Server.handleWritableSelectionKey");
     }
 
     private void handleReadableSelectionKey(SelectionKey selectionKey) {
@@ -85,22 +84,11 @@ public class Server {
             @Override
             public void run() {
                 SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-                ByteBuffer dst = ByteBuffer.allocateDirect(Utils.EIGHT_K);
-                try {
-                    socketChannel.read(dst);
-                    dst.flip();
-                    byte[] bytes = new byte[dst.remaining()];
-                    dst.get(bytes);
-                    String hashCode = Utils.createSha1FromBytes(bytes);
-                    Utils.debug(String.format("hashCode = %s", hashCode));
+                byte[] bytes = Utils.readBytesFromChannel(socketChannel, Utils.EIGHT_KB);
+                String hashCode = Utils.createSha1FromBytes(bytes);
+                Utils.debug(String.format("received hashCode = %s", hashCode));
 
-                    ByteBuffer src = ByteBuffer.wrap(hashCode.getBytes());
-                    socketChannel.write(src);
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                    System.exit(-1);
-                }
+                Utils.writeBytesToChannel(socketChannel, hashCode.getBytes());
                 super.run();
             }
         });
