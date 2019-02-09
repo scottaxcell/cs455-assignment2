@@ -41,17 +41,18 @@ public class NioClient implements Runnable {
                     if (selectionKey.isReadable())
                         handleRead(selectionKey);
                     else if (selectionKey.isConnectable())
-                        handleConnectableSelectionKey(selectionKey);
+                        handleConnect(selectionKey);
                 }
             }
             catch (IOException e) {
                 e.printStackTrace();
+                System.exit(-1);
             }
         }
     }
 
-    private void handleConnectableSelectionKey(SelectionKey selectionKey) throws IOException {
-        Utils.debug("Client.handleConnectableSelectionKey");
+    private void handleConnect(SelectionKey selectionKey) throws IOException {
+        Utils.debug("Client.handleConnect");
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
         socketChannel.finishConnect();
         selectionKey.interestOps(SelectionKey.OP_READ);
@@ -60,22 +61,23 @@ public class NioClient implements Runnable {
             Random random = new Random();
             byte[] randomBytes = new byte[Utils.EIGHT_KB];
 
-//            while (!Thread.currentThread().isInterrupted()) {
-            random.nextBytes(randomBytes);
-            String hashCode = Utils.createSha1FromBytes(randomBytes);
-            hashCodes.put(Utils.createSha1FromBytes(randomBytes));
-            Utils.writeBytesToChannel(socketChannel, randomBytes);
-            Utils.debug(String.format("sent hashCode = %s", hashCode));
+            while (!Thread.currentThread().isInterrupted()) {
+                random.nextBytes(randomBytes);
+                String hashCode = Utils.createSha1FromBytes(randomBytes);
+                hashCodes.put(Utils.createSha1FromBytes(randomBytes));
+                Utils.writeBytesToChannel(socketChannel, randomBytes);
+                Utils.debug(String.format("sent hashCode = %s", hashCode));
 
-            try {
-                // TODO enable messageRate
+                try {
+                    // TODO enable messageRate
 //                    Thread.sleep(1000 / messageRate);
-                Thread.sleep(3000);
+                    Thread.sleep(3000);
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                    System.exit(-1);
+                }
             }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-//            }
         };
         new Thread(runnable).start();
     }
@@ -84,7 +86,6 @@ public class NioClient implements Runnable {
         Utils.debug("Client.handleRead");
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
         byte[] bytes = Utils.readBytesFromChannel(socketChannel, Utils.FORTY_B);
-//        String hashCode = Utils.createSha1FromBytes(bytes);
         String hashCode = new String(bytes);
         Utils.debug(String.format("read hashCode = %s", hashCode));
         hashCodes.remove(hashCode);
@@ -100,6 +101,7 @@ public class NioClient implements Runnable {
         }
         catch (IOException e) {
             e.printStackTrace();
+            System.exit(-1);
         }
     }
 
