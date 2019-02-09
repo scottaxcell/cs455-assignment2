@@ -1,5 +1,7 @@
 package cs455.scaling.threadpool;
 
+import cs455.scaling.util.Utils;
+
 public class Worker extends Thread {
     private Task task;
     private final WorkerQueue workerQueue;
@@ -9,8 +11,9 @@ public class Worker extends Thread {
         this.workerQueue = workerQueue;
     }
 
-    public void setTask(Task task) {
+    public synchronized void setTask(Task task) {
         this.task = task;
+        notify();
     }
 
     @Override

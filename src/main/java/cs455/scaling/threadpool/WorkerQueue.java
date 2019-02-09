@@ -1,5 +1,7 @@
 package cs455.scaling.threadpool;
 
+import cs455.scaling.util.Utils;
+
 import java.util.LinkedList;
 
 public class WorkerQueue {
@@ -14,10 +16,13 @@ public class WorkerQueue {
                 e.printStackTrace();
             }
         }
-        return queue.pollFirst();
+        Worker worker = queue.pollFirst();
+        Utils.debug(String.format("%s removed from workerQueue; %d workers in queue", worker, queue.size()));
+        return worker;
     }
 
     public synchronized void put(Worker worker) {
+        Utils.debug(String.format("%s added to workerQueue; %d workers in queue", worker, queue.size()));
         queue.addLast(worker);
         notify();
     }

@@ -13,12 +13,9 @@ public class ThreadPool extends Thread {
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
-            Worker worker = getWorker();
             Task task = getTask();
-            synchronized (worker) { // prevents IllegalMonitorStateException
-                worker.setTask(task);
-                worker.notify();
-            }
+            Worker worker = getWorker();
+            worker.setTask(task);
         }
     }
 

@@ -95,7 +95,7 @@ public class Server {
                 SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
                 ByteBuffer dst = ByteBuffer.allocateDirect(Utils.EIGHT_K);
                 try {
-                    int numBytesRead = socketChannel.read(dst);
+                    socketChannel.read(dst);
                     dst.flip();
                     byte[] bytes = new byte[dst.remaining()];
                     dst.get(bytes);

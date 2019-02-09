@@ -1,5 +1,6 @@
 package cs455.scaling.threadpool;
 
+import cs455.scaling.util.Utils;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -17,6 +18,7 @@ public class ThreadPoolTest {
         threadPool.execute(new Task());
 
         Thread.sleep(3000);
+        Utils.debug("done");
     }
 
 }
