@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -64,9 +65,9 @@ public class NioClient implements Runnable {
             while (!Thread.currentThread().isInterrupted()) {
                 random.nextBytes(randomBytes);
                 String hashCode = Utils.createSha1FromBytes(randomBytes);
-                hashCodes.put(Utils.createSha1FromBytes(randomBytes));
+                hashCodes.put(new String(Arrays.copyOfRange(hashCode.getBytes(), 0, Utils.HASH_CODE_BYTE_SIZE)));
                 Utils.writeBytesToChannel(socketChannel, randomBytes);
-                Utils.debug(String.format("sent hashCode = %s", hashCode));
+                Utils.debug(String.format("sent hashCode = %s (%d)", hashCode, hashCode.length()));
 
                 try {
                     // TODO enable messageRate
@@ -82,10 +83,10 @@ public class NioClient implements Runnable {
         new Thread(runnable).start();
     }
 
-    private void handleRead(SelectionKey selectionKey) {
+    private void handleRead(SelectionKey selectionKey) throws IOException {
         Utils.debug("Client.handleRead");
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-        byte[] bytes = Utils.readBytesFromChannel(socketChannel, Utils.FORTY_B);
+        byte[] bytes = Utils.readBytesFromChannel(socketChannel, Utils.HASH_CODE_BYTE_SIZE);
         String hashCode = new String(bytes);
         Utils.debug(String.format("read hashCode = %s", hashCode));
         hashCodes.remove(hashCode);

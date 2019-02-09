@@ -1,7 +1,5 @@
 package cs455.scaling.threadpool;
 
-import cs455.scaling.util.Utils;
-
 import java.util.LinkedList;
 
 public class TaskQueue {

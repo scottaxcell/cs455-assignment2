@@ -1,10 +1,8 @@
 package cs455.scaling.threadpool;
 
-import cs455.scaling.util.Utils;
-
 public class Worker extends Thread {
-    private Task task;
     private final WorkerQueue workerQueue;
+    private Task task;
 
     public Worker(String name, WorkerQueue workerQueue) {
         super(name);

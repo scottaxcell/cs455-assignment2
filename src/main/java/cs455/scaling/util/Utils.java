@@ -11,7 +11,7 @@ import java.util.Date;
 
 public class Utils {
     public static final int EIGHT_KB = 8129;
-    public static final int FORTY_B = 40;
+    public static final int HASH_CODE_BYTE_SIZE = 20;
     public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.S");
     private static boolean debug = true;
 
@@ -45,18 +45,11 @@ public class Utils {
         return hashInt.toString(16);
     }
 
-    public static byte[] readBytesFromChannel(SocketChannel socketChannel, int sizeOfBuffer) {
+    public static byte[] readBytesFromChannel(SocketChannel socketChannel, int sizeOfBuffer) throws IOException {
         ByteBuffer dst = ByteBuffer.allocateDirect(sizeOfBuffer);
         int numBytesRead = 0;
-        while (dst.hasRemaining() && numBytesRead != 1) {
-            try {
+        while (dst.hasRemaining() && numBytesRead != -1)
                 numBytesRead = socketChannel.read(dst);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        Utils.debug(numBytesRead);
         dst.flip();
         byte[] bytes = new byte[dst.remaining()];
         dst.get(bytes);
@@ -65,15 +58,20 @@ public class Utils {
 
     public static void writeBytesToChannel(SocketChannel socketChannel, byte[] bytes) {
         ByteBuffer src = ByteBuffer.wrap(bytes);
+//        ByteBuffer src = ByteBuffer.allocateDirect(sizeOfBuffer);
+//        src.clear();
+//        src.put(bytes);
+//        src.flip();
         int numBytesWritten = 0;
-        while (src.hasRemaining() && numBytesWritten != -1) {
+        while (src.hasRemaining()) {
             try {
-                numBytesWritten = socketChannel.write(src);
+                numBytesWritten += socketChannel.write(src);
             }
             catch (IOException e) {
                 e.printStackTrace();
                 System.exit(-1);
             }
         }
+        Utils.debug(numBytesWritten);
     }
 }
