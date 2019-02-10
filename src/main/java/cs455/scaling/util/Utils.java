@@ -72,6 +72,6 @@ public class Utils {
                 System.exit(-1);
             }
         }
-        Utils.debug(numBytesWritten);
+//        Utils.debug(numBytesWritten);
     }
 }

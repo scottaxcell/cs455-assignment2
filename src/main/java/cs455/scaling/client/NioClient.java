@@ -53,7 +53,7 @@ public class NioClient implements Runnable {
     }
 
     private void handleConnect(SelectionKey selectionKey) throws IOException {
-        Utils.debug("Client.handleConnect");
+//        Utils.debug("Client.handleConnect");
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
         socketChannel.finishConnect();
         selectionKey.interestOps(SelectionKey.OP_READ);
@@ -62,6 +62,7 @@ public class NioClient implements Runnable {
             Random random = new Random();
             byte[] randomBytes = new byte[Utils.EIGHT_KB];
 
+            int debugCount = 0;
             while (!Thread.currentThread().isInterrupted()) {
                 random.nextBytes(randomBytes);
                 String hashCode = Utils.createSha1FromBytes(randomBytes);
@@ -71,20 +72,23 @@ public class NioClient implements Runnable {
 
                 try {
                     // TODO enable messageRate
-//                    Thread.sleep(1000 / messageRate);
-                    Thread.sleep(3000);
+                    Thread.sleep(1000 / messageRate);
+//                    Thread.sleep(3000);
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();
                     System.exit(-1);
                 }
+//                debugCount++;
+//                if (debugCount > 25)
+//                    break;
             }
         };
         new Thread(runnable).start();
     }
 
     private void handleRead(SelectionKey selectionKey) throws IOException {
-        Utils.debug("Client.handleRead");
+//        Utils.debug("Client.handleRead");
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
         byte[] bytes = Utils.readBytesFromChannel(socketChannel, Utils.HASH_CODE_BYTE_SIZE);
         String hashCode = new String(bytes);
