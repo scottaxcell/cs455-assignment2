@@ -1,17 +1,27 @@
 package cs455.scaling.threadpool;
 
 import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 class BatchJobMgr {
     private final int batchSize;
-    private AtomicBoolean batchJobReady = new AtomicBoolean(false);
     private final BlockingQueue<BatchJob> batchJobs = new LinkedBlockingQueue<>();
+    private AtomicBoolean batchJobReady = new AtomicBoolean(false);
 
-    BatchJobMgr(int batchSize) {
+    BatchJobMgr(int batchSize, int batchTime) {
         this.batchSize = batchSize;
+        scheduleBatchTimeTimer(batchTime);
+    }
+
+    private void scheduleBatchTimeTimer(int batchTime) {
+        int batchTimeSeconds = batchTime * 1000;
+        BatchTimeTimer batchTimeTimer = new BatchTimeTimer();
+        Timer timer = new Timer(true);
+        timer.scheduleAtFixedRate(batchTimeTimer, batchTimeSeconds, batchTimeSeconds);
     }
 
     void addBatchTask(BatchTask batchTask) {
@@ -54,17 +64,20 @@ class BatchJobMgr {
             catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            if (batchJobs.peek() == null)
+                batchJobReady.set(false);
         }
         batchJobReady.set(false);
         return batchJobs.poll();
     }
 
-    private boolean isBatchJobReady() {
-        BatchJob batchJob = batchJobs.peek();
-        if (batchJob != null) {
-            if (batchJob.getBatchTaskSize() == batchSize)
-                return true;
+    private class BatchTimeTimer extends TimerTask {
+        @Override
+        public void run() {
+            batchJobReady.set(true);
+            synchronized (BatchJobMgr.this) { // prevents IllegalMonitorStateException
+                BatchJobMgr.this.notify();
+            }
         }
-        return false;
     }
 }

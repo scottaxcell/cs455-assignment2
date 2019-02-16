@@ -1,16 +1,12 @@
 package cs455.scaling.threadpool;
 
 public class ThreadPoolMgr extends Thread {
-    private final int batchSize;
-    private final int batchTime;
     private final ThreadPool threadPool;
     private final BatchJobMgr batchJobMgr;
 
     public ThreadPoolMgr(int threadPoolSize, int batchSize, int batchTime) {
-        this.batchSize = batchSize;
-        this.batchTime = batchTime;
         threadPool = new ThreadPool(threadPoolSize);
-        batchJobMgr = new BatchJobMgr(batchSize);
+        batchJobMgr = new BatchJobMgr(batchSize, batchTime);
     }
 
     @Override
@@ -26,7 +22,6 @@ public class ThreadPoolMgr extends Thread {
             }
         }
     }
-
 
     /**
      * Returns a worker, waiting if necessary until a worker becomes available

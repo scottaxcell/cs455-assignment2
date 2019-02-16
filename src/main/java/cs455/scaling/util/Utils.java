@@ -49,7 +49,7 @@ public class Utils {
         ByteBuffer dst = ByteBuffer.allocateDirect(sizeOfBuffer);
         int numBytesRead = 0;
         while (dst.hasRemaining() && numBytesRead != -1)
-                numBytesRead = socketChannel.read(dst);
+            numBytesRead = socketChannel.read(dst);
         dst.flip();
         byte[] bytes = new byte[dst.remaining()];
         dst.get(bytes);
