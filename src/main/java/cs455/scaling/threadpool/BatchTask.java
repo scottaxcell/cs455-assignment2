@@ -17,6 +17,7 @@ public class BatchTask implements Runnable {
 
     @Override
     public void run() {
+        selectionKey.interestOps(SelectionKey.OP_WRITE);
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
         String hashCode = Utils.createSha1FromBytes(data);
 //                Utils.debug(String.format("received hashCode = %s", hashCode));

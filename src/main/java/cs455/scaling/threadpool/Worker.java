@@ -4,15 +4,15 @@ import java.util.concurrent.BlockingQueue;
 
 public class Worker extends Thread {
     private final BlockingQueue<Worker> workerQueue;
-    private Task task;
+    private Runnable job;
 
-    public Worker(String name, BlockingQueue<Worker> workerQueue) {
+    Worker(String name, BlockingQueue<Worker> workerQueue) {
         super(name);
         this.workerQueue = workerQueue;
     }
 
-    public synchronized void setTask(Task task) {
-        this.task = task;
+    synchronized void setJob(Runnable job) {
+        this.job = job;
         notify();
     }
 
@@ -26,8 +26,7 @@ public class Worker extends Thread {
                 catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
-                while (task == null) {
+                while (job == null) {
                     try {
                         wait();
                     }
@@ -35,10 +34,8 @@ public class Worker extends Thread {
                         e.printStackTrace();
                     }
                 }
-
-                task.run();
-
-                task = null;
+                job.run();
+                job = null;
             }
         }
     }

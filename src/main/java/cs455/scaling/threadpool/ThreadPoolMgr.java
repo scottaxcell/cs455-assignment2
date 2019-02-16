@@ -1,31 +1,25 @@
 package cs455.scaling.threadpool;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
-/**
- * TODO
- * - create work unit and data packet
- */
 public class ThreadPoolMgr extends Thread {
     private final int batchSize;
     private final int batchTime;
     private final ThreadPool threadPool;
-    private final BlockingQueue<Task> workUnitQueue = new LinkedBlockingQueue<>();
+    private final BatchJobMgr batchJobMgr;
 
     public ThreadPoolMgr(int threadPoolSize, int batchSize, int batchTime) {
         this.batchSize = batchSize;
         this.batchTime = batchTime;
         threadPool = new ThreadPool(threadPoolSize);
+        batchJobMgr = new BatchJobMgr(batchSize);
     }
 
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Task task = getTask();
                 Worker worker = getWorker();
-                worker.setTask(task);
+                BatchJob batchJob = getBatchJob();
+                worker.setJob(batchJob);
             }
             catch (InterruptedException e) {
                 e.printStackTrace();
@@ -44,22 +38,14 @@ public class ThreadPoolMgr extends Thread {
     /**
      * Returns a task, waiting if necessary until a task becomes available
      */
-    private Task getTask() throws InterruptedException {
-        return workUnitQueue.take();
+    private BatchJob getBatchJob() {
+        return batchJobMgr.getBatchJob();
     }
 
     /**
-     * Executes the given task sometime in the future. The task
-     * will execute in an existing pooled thread.
+     * Executes the given task sometime in the future
      */
-    public void execute(Task task) {
-        // TODO add work unit to last work unit if still space
-        // otherwise create new work unit and add it to queue
-        try {
-            workUnitQueue.put(task);
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void execute(BatchTask batchTask) {
+        batchJobMgr.addBatchTask(batchTask);
     }
 }

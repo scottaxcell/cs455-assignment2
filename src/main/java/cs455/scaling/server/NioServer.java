@@ -1,6 +1,6 @@
 package cs455.scaling.server;
 
-import cs455.scaling.threadpool.Task;
+import cs455.scaling.threadpool.BatchTask;
 import cs455.scaling.threadpool.ThreadPoolMgr;
 import cs455.scaling.util.Utils;
 
@@ -11,7 +11,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
 import java.util.Iterator;
 
 public class NioServer implements Runnable {
@@ -19,8 +18,7 @@ public class NioServer implements Runnable {
     private ServerSocketChannel serverSocketChannel;
     private Selector selector;
     private SelectionKey selectionKey;
-        private ThreadPoolMgr threadPoolMgr;
-//    private Executor threadPoolMgr;
+    private ThreadPoolMgr threadPoolMgr;
 
     public NioServer(int port, int threadPoolSize, int batchSize, int batchTime) {
         this.port = port;
@@ -70,27 +68,37 @@ public class NioServer implements Runnable {
 
     private void handleRead(SelectionKey selectionKey) {
 //        Utils.debug(String.format("Server.handleRead key = %s", selectionKey));
-        selectionKey.interestOps(SelectionKey.OP_WRITE);
-        threadPoolMgr.execute(new Task() {
-            @Override
-            public void run() {
-                SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-                byte[] bytes = null;
-                try {
-                    bytes = Utils.readBytesFromChannel(socketChannel, Utils.EIGHT_KB);
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                    System.exit(-1);
-                }
-                String hashCode = Utils.createSha1FromBytes(bytes);
-//                Utils.debug(String.format("received hashCode = %s", hashCode));
-
-                Utils.writeBytesToChannel(socketChannel, Arrays.copyOfRange(hashCode.getBytes(), 0, Utils.HASH_CODE_BYTE_SIZE));
-                selectionKey.interestOps(SelectionKey.OP_READ);
-                super.run();
-            }
-        });
+//        selectionKey.interestOps(SelectionKey.OP_WRITE);
+        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+        byte[] bytes = null;
+        try {
+            bytes = Utils.readBytesFromChannel(socketChannel, Utils.EIGHT_KB);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        threadPoolMgr.execute(new BatchTask(selectionKey, bytes));
+//        threadPoolMgr.execute(new Task() {
+//            @Override
+//            public void run() {
+//                SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+//                byte[] bytes = null;
+//                try {
+//                    bytes = Utils.readBytesFromChannel(socketChannel, Utils.EIGHT_KB);
+//                }
+//                catch (IOException e) {
+//                    e.printStackTrace();
+//                    System.exit(-1);
+//                }
+//                String hashCode = Utils.createSha1FromBytes(bytes);
+////                Utils.debug(String.format("received hashCode = %s", hashCode));
+//
+//                Utils.writeBytesToChannel(socketChannel, Arrays.copyOfRange(hashCode.getBytes(), 0, Utils.HASH_CODE_BYTE_SIZE));
+//                selectionKey.interestOps(SelectionKey.OP_READ);
+//                super.run();
+//            }
+//        });
     }
 
     private void initServerSocketChannel() {

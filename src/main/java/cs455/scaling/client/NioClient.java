@@ -84,9 +84,9 @@ public class NioClient implements Runnable {
                     e.printStackTrace();
                     System.exit(-1);
                 }
-//                debugCount++;
-//                if (debugCount > 25)
-//                    break;
+                debugCount++;
+                if (debugCount > 40)
+                    break;
             }
         };
         new Thread(runnable).start();

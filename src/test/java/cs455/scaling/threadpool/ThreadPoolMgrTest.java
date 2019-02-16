@@ -7,16 +7,16 @@ public class ThreadPoolMgrTest {
 
     @Test
     public void test() throws InterruptedException {
-        ThreadPoolMgr threadPoolMgr = new ThreadPoolMgr(4, 10, 100);
-        threadPoolMgr.start();
-        threadPoolMgr.execute(new Task());
-        threadPoolMgr.execute(new Task());
-        threadPoolMgr.execute(new Task());
-        threadPoolMgr.execute(new Task());
-        threadPoolMgr.execute(new Task());
-
-        Thread.sleep(3000);
-        Utils.debug("done");
+//        ThreadPoolMgr threadPoolMgr = new ThreadPoolMgr(4, 10, 100);
+//        threadPoolMgr.start();
+//        threadPoolMgr.execute(new Task());
+//        threadPoolMgr.execute(new Task());
+//        threadPoolMgr.execute(new Task());
+//        threadPoolMgr.execute(new Task());
+//        threadPoolMgr.execute(new Task());
+//
+//        Thread.sleep(3000);
+//        Utils.debug("done");
     }
 
 }
