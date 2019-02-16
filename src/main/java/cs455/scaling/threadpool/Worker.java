@@ -1,10 +1,12 @@
 package cs455.scaling.threadpool;
 
+import java.util.concurrent.BlockingQueue;
+
 public class Worker extends Thread {
-    private final WorkerQueue workerQueue;
+    private final BlockingQueue<Worker> workerQueue;
     private Task task;
 
-    public Worker(String name, WorkerQueue workerQueue) {
+    public Worker(String name, BlockingQueue<Worker> workerQueue) {
         super(name);
         this.workerQueue = workerQueue;
     }
@@ -18,7 +20,12 @@ public class Worker extends Thread {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             synchronized (this) { // prevents IllegalMonitorStateException
-                workerQueue.put(this);
+                try {
+                    workerQueue.put(this);
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 while (task == null) {
                     try {

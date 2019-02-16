@@ -66,7 +66,12 @@ public class NioClient implements Runnable {
             while (!Thread.currentThread().isInterrupted()) {
                 random.nextBytes(randomBytes);
                 String hashCode = Utils.createSha1FromBytes(randomBytes);
-                hashCodes.put(new String(Arrays.copyOfRange(hashCode.getBytes(), 0, Utils.HASH_CODE_BYTE_SIZE)));
+                try {
+                    hashCodes.put(new String(Arrays.copyOfRange(hashCode.getBytes(), 0, Utils.HASH_CODE_BYTE_SIZE)));
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 Utils.writeBytesToChannel(socketChannel, randomBytes);
                 Utils.debug(String.format("sent hashCode = %s (%d)", hashCode, hashCode.length()));
 

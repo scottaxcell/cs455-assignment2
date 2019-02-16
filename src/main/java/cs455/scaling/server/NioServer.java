@@ -1,7 +1,7 @@
 package cs455.scaling.server;
 
 import cs455.scaling.threadpool.Task;
-import cs455.scaling.threadpool.ThreadPool;
+import cs455.scaling.threadpool.ThreadPoolMgr;
 import cs455.scaling.util.Utils;
 
 import java.io.IOException;
@@ -22,17 +22,17 @@ public class NioServer implements Runnable {
     private ServerSocketChannel serverSocketChannel;
     private Selector selector;
     private SelectionKey selectionKey;
-        private ThreadPool threadPool;
-//    private Executor threadPool;
+        private ThreadPoolMgr threadPoolMgr;
+//    private Executor threadPoolMgr;
 
     public NioServer(int port, int threadPoolSize, int batchSize, int batchTime) {
         this.port = port;
         this.threadPoolSize = threadPoolSize;
         this.batchSize = batchSize;
         this.batchTime = batchTime;
-//        threadPool = Executors.newFixedThreadPool(threadPoolSize);
-        threadPool = new ThreadPool(threadPoolSize);
-        threadPool.start();
+//        threadPoolMgr = Executors.newFixedThreadPool(threadPoolSize);
+        threadPoolMgr = new ThreadPoolMgr(threadPoolSize);
+        threadPoolMgr.start();
     }
 
     @Override
@@ -78,7 +78,7 @@ public class NioServer implements Runnable {
     private void handleRead(SelectionKey selectionKey) {
 //        Utils.debug(String.format("Server.handleRead key = %s", selectionKey));
         selectionKey.interestOps(SelectionKey.OP_WRITE);
-        threadPool.execute(new Task() {
+        threadPoolMgr.execute(new Task() {
             @Override
             public void run() {
                 SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
