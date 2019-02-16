@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static cs455.scaling.util.Utils.SIMPLE_DATE_FORMAT;
 
 public class ThroughputStatisticsMgr {
-    private final int THROUGHPUT_STATISTICS_DELAY = 20;
+    private final int THROUGHPUT_STATISTICS_DELAY = 5;
     private final AtomicInteger numActiveClients = new AtomicInteger(0);
     private final AtomicInteger numMessages = new AtomicInteger(0);
     private final List<ThroughputStatistics> throughputStatisticsList = new ArrayList<>();
@@ -31,9 +31,28 @@ public class ThroughputStatisticsMgr {
         String timeStamp = String.format("[%s]", SIMPLE_DATE_FORMAT.format(new Date()));
         String serverThroughput = String.format("Server Throughput: %d", getServerThroughput());
         String activeClients = String.format("Active Client Connections: %d", getNumActiveClients());
-        String meanThroughput = String.format("Mean Per-client Throughput: %d", getServerThroughput());
-        String stdDevThroughput = String.format("Std. Dev. Of Per-client Throughput: %d", getServerThroughput());
+        String meanThroughput = String.format("Mean Per-client Throughput: %.2f", getMeanPerClientThroughput());
+        String stdDevThroughput = String.format("Std. Dev. Of Per-client Throughput: %.2f", getStdDevPerClientThroughput());
         Utils.out(String.format("%s %s, %s, %s, %s\n", timeStamp, serverThroughput, activeClients, meanThroughput, stdDevThroughput));
+    }
+
+    private double getStdDevPerClientThroughput() {
+        if (numActiveClients.get() == 0)
+            return Double.valueOf(0);
+        double mean = getMeanPerClientThroughput();
+        double stdDev = 0;
+        for (ThroughputStatistics throughputStatistics : throughputStatisticsList)
+            stdDev += Math.pow((throughputStatistics.getNumMessages() - mean), 2);
+        return Math.sqrt(stdDev / numActiveClients.get()) / THROUGHPUT_STATISTICS_DELAY;
+    }
+
+    private double getMeanPerClientThroughput() {
+        if (numActiveClients.get() == 0)
+            return Double.valueOf(0);
+        double sum = 0;
+        for (ThroughputStatistics throughputStatistics : throughputStatisticsList)
+            sum += throughputStatistics.getNumMessages();
+        return (sum / numActiveClients.get()) / THROUGHPUT_STATISTICS_DELAY;
     }
 
     private int getNumActiveClients() {
@@ -50,11 +69,11 @@ public class ThroughputStatisticsMgr {
             .forEach(ThroughputStatistics::reset);
     }
 
-    public void incrementNumActiveClients() {
+    void incrementNumActiveClients() {
         numActiveClients.getAndIncrement();
     }
 
-    public void incrementNumMessages() {
+    void incrementNumMessages() {
         numMessages.getAndIncrement();
     }
 

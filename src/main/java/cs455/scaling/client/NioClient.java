@@ -62,7 +62,7 @@ public class NioClient implements Runnable {
             Random random = new Random();
             byte[] randomBytes = new byte[Utils.EIGHT_KB];
 
-            int debugCount = 0;
+//            int debugCount = 0;
             while (!Thread.currentThread().isInterrupted()) {
                 random.nextBytes(randomBytes);
                 String hashCode = Utils.createSha1FromBytes(randomBytes);
@@ -84,9 +84,9 @@ public class NioClient implements Runnable {
                     e.printStackTrace();
                     System.exit(-1);
                 }
-                debugCount++;
-                if (debugCount > 40)
-                    break;
+//                debugCount++;
+//                if (debugCount > 40)
+//                    break;
             }
         };
         new Thread(runnable).start();

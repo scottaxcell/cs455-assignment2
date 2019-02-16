@@ -24,7 +24,7 @@ public class BatchTask implements Runnable {
 //                Utils.debug(String.format("received hashCode = %s", hashCode));
         Utils.writeBytesToChannel(socketChannel, Arrays.copyOfRange(hashCode.getBytes(), 0, Utils.HASH_CODE_BYTE_SIZE));
         selectionKey.interestOps(SelectionKey.OP_READ);
-        Utils.debug(String.format("%s executed", this));
+//        Utils.debug(String.format("%s executed", this));
         ThroughputStatistics throughputStatistics = (ThroughputStatistics) selectionKey.attachment();
         throughputStatistics.incrementNumMessages();
     }
