@@ -1,5 +1,6 @@
 package cs455.scaling.threadpool;
 
+import cs455.scaling.util.ThroughputStatistics;
 import cs455.scaling.util.Utils;
 
 import java.nio.channels.SelectionKey;
@@ -24,5 +25,7 @@ public class BatchTask implements Runnable {
         Utils.writeBytesToChannel(socketChannel, Arrays.copyOfRange(hashCode.getBytes(), 0, Utils.HASH_CODE_BYTE_SIZE));
         selectionKey.interestOps(SelectionKey.OP_READ);
         Utils.debug(String.format("%s executed", this));
+        ThroughputStatistics throughputStatistics = (ThroughputStatistics) selectionKey.attachment();
+        throughputStatistics.incrementNumMessages();
     }
 }

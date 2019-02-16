@@ -2,6 +2,8 @@ package cs455.scaling.server;
 
 import cs455.scaling.threadpool.BatchTask;
 import cs455.scaling.threadpool.ThreadPoolMgr;
+import cs455.scaling.util.ThroughputStatisticsMgr;
+import cs455.scaling.util.ThroughputStatistics;
 import cs455.scaling.util.Utils;
 
 import java.io.IOException;
@@ -19,6 +21,7 @@ public class NioServer implements Runnable {
     private Selector selector;
     private SelectionKey selectionKey;
     private ThreadPoolMgr threadPoolMgr;
+    private ThroughputStatisticsMgr throughputStatisticsMgr = new ThroughputStatisticsMgr();
 
     public NioServer(int port, int threadPoolSize, int batchSize, int batchTime) {
         this.port = port;
@@ -59,7 +62,10 @@ public class NioServer implements Runnable {
         ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectionKey.channel();
         SocketChannel socketChannel = serverSocketChannel.accept();
         socketChannel.configureBlocking(false);
-        socketChannel.register(selector, SelectionKey.OP_READ);
+        SelectionKey register = socketChannel.register(selector, SelectionKey.OP_READ);
+        ThroughputStatistics throughputStatistics = new ThroughputStatistics(throughputStatisticsMgr);
+        register.attach(throughputStatistics);
+        throughputStatisticsMgr.addThroughputStatistics(throughputStatistics);
     }
 
     private void handleWrite(SelectionKey selectionKey) {
