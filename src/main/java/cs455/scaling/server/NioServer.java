@@ -16,9 +16,6 @@ import java.util.Iterator;
 
 public class NioServer implements Runnable {
     private final int port;
-    private final int threadPoolSize;
-    private final int batchSize;
-    private final int batchTime;
     private ServerSocketChannel serverSocketChannel;
     private Selector selector;
     private SelectionKey selectionKey;
@@ -27,11 +24,7 @@ public class NioServer implements Runnable {
 
     public NioServer(int port, int threadPoolSize, int batchSize, int batchTime) {
         this.port = port;
-        this.threadPoolSize = threadPoolSize;
-        this.batchSize = batchSize;
-        this.batchTime = batchTime;
-//        threadPoolMgr = Executors.newFixedThreadPool(threadPoolSize);
-        threadPoolMgr = new ThreadPoolMgr(threadPoolSize);
+        threadPoolMgr = new ThreadPoolMgr(threadPoolSize, batchSize, batchTime);
         threadPoolMgr.start();
     }
 

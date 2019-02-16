@@ -4,16 +4,19 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * -
+ * TODO
+ * - create work unit and data packet
  */
 public class ThreadPoolMgr extends Thread {
-    private final int numThreads;
-    private final BlockingQueue<Worker> workerQueue = new LinkedBlockingQueue<>();
+    private final int batchSize;
+    private final int batchTime;
+    private final ThreadPool threadPool;
     private final BlockingQueue<Task> workUnitQueue = new LinkedBlockingQueue<>();
 
-    public ThreadPoolMgr(int numThreads) {
-        this.numThreads = numThreads;
-        initWorkers();
+    public ThreadPoolMgr(int threadPoolSize, int batchSize, int batchTime) {
+        this.batchSize = batchSize;
+        this.batchTime = batchTime;
+        threadPool = new ThreadPool(threadPoolSize);
     }
 
     @Override
@@ -30,18 +33,12 @@ public class ThreadPoolMgr extends Thread {
         }
     }
 
-    private void initWorkers() {
-        for (int i = 0; i < numThreads; i++) {
-            Worker worker = new Worker(String.format("Worker %d", i), workerQueue);
-            worker.start();
-        }
-    }
 
     /**
      * Returns a worker, waiting if necessary until a worker becomes available
      */
     private Worker getWorker() throws InterruptedException {
-        return workerQueue.take();
+        return threadPool.getWorker();
     }
 
     /**

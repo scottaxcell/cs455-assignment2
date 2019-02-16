@@ -7,7 +7,7 @@ public class ThreadPoolMgrTest {
 
     @Test
     public void test() throws InterruptedException {
-        ThreadPoolMgr threadPoolMgr = new ThreadPoolMgr(4);
+        ThreadPoolMgr threadPoolMgr = new ThreadPoolMgr(4, 10, 100);
         threadPoolMgr.start();
         threadPoolMgr.execute(new Task());
         threadPoolMgr.execute(new Task());
