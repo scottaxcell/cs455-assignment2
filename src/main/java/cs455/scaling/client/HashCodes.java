@@ -10,12 +10,12 @@ public class HashCodes {
 
     public void put(String hashCode) throws InterruptedException {
         hashCodes.put(hashCode);
-        Utils.debug(String.format("%s put in hashCodes; %d hashCodes", hashCode, hashCodes.size()));
+//        Utils.debug(String.format("%s put in hashCodes; %d hashCodes", hashCode, hashCodes.size()));
     }
 
     public boolean remove(String hashCode) {
         boolean removed = hashCodes.remove(hashCode);
-        Utils.debug(String.format("%s removed (%s) from hashCodes; %d hashCodes", hashCode, removed, hashCodes.size()));
+//        Utils.debug(String.format("%s removed (%s) from hashCodes; %d hashCodes", hashCode, removed, hashCodes.size()));
         return removed;
     }
 }

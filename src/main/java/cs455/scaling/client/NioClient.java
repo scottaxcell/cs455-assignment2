@@ -19,6 +19,7 @@ public class NioClient implements Runnable {
     private SocketChannel socketChannel;
     private SelectionKey selectionKey;
     private HashCodes hashCodes = new HashCodes();
+    private final TransmissionStatistics transmissionStatistics = new TransmissionStatistics();
 
     public NioClient(String serverHost, int serverPort, int messageRate) {
         this.serverHost = serverHost;
@@ -73,7 +74,8 @@ public class NioClient implements Runnable {
                     e.printStackTrace();
                 }
                 Utils.writeBytesToChannel(socketChannel, randomBytes);
-                Utils.debug(String.format("sent hashCode = %s (%d)", hashCode, hashCode.length()));
+//                Utils.debug(String.format("sent hashCode = %s (%d)", hashCode, hashCode.length()));
+                transmissionStatistics.incrementNumMessagesSent();
 
                 try {
                     // TODO enable messageRate
@@ -97,8 +99,9 @@ public class NioClient implements Runnable {
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
         byte[] bytes = Utils.readBytesFromChannel(socketChannel, Utils.HASH_CODE_BYTE_SIZE);
         String hashCode = new String(bytes);
-        Utils.debug(String.format("read hashCode = %s", hashCode));
+//        Utils.debug(String.format("read hashCode = %s", hashCode));
         hashCodes.remove(hashCode);
+        transmissionStatistics.incrementNumMessagesReceived();
     }
 
     private void connectToServer() {

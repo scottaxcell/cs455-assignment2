@@ -82,7 +82,6 @@ public class ThroughputStatisticsMgr {
     }
 
     private class ThroughputStatisticsTimer extends TimerTask {
-
         @Override
         public void run() {
             printStatistics();

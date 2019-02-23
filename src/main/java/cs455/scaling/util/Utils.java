@@ -11,7 +11,7 @@ import java.util.Date;
 
 public class Utils {
     public static final int EIGHT_KB = 8129;
-    public static final int HASH_CODE_BYTE_SIZE = 20;
+    public static final int HASH_CODE_BYTE_SIZE = 30;
     public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
     private static boolean debug = true;
 

@@ -16,11 +16,11 @@ public class ThroughputStatistics {
         throughputStatisticsMgr.incrementNumMessages();
     }
 
-    public int getNumMessages() {
+    int getNumMessages() {
         return numMessages.get();
     }
 
-    public void reset() {
+    void reset() {
         numMessages.set(0);
     }
 }
