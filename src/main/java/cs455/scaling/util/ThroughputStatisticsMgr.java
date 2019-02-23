@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static cs455.scaling.util.Utils.SIMPLE_DATE_FORMAT;
 
 public class ThroughputStatisticsMgr {
-    private final int THROUGHPUT_STATISTICS_DELAY = 5;
+    private final int THROUGHPUT_STATISTICS_DELAY = 20;
     private final AtomicInteger numActiveClients = new AtomicInteger(0);
     private final AtomicInteger numMessages = new AtomicInteger(0);
     private final List<ThroughputStatistics> throughputStatisticsList = new ArrayList<>();
@@ -29,10 +29,10 @@ public class ThroughputStatisticsMgr {
 
     private synchronized void printStatistics() {
         String timeStamp = String.format("[%s]", SIMPLE_DATE_FORMAT.format(new Date()));
-        String serverThroughput = String.format("Server Throughput: %d", getServerThroughput());
+        String serverThroughput = String.format("Server Throughput: %d messages/s", getServerThroughput());
         String activeClients = String.format("Active Client Connections: %d", getNumActiveClients());
-        String meanThroughput = String.format("Mean Per-client Throughput: %.2f", getMeanPerClientThroughput());
-        String stdDevThroughput = String.format("Std. Dev. Of Per-client Throughput: %.2f", getStdDevPerClientThroughput());
+        String meanThroughput = String.format("Mean Per-client Throughput: %.2f messages/s", getMeanPerClientThroughput());
+        String stdDevThroughput = String.format("Std. Dev. Of Per-client Throughput: %.2f messages/s", getStdDevPerClientThroughput());
         Utils.out(String.format("%s %s, %s, %s, %s\n", timeStamp, serverThroughput, activeClients, meanThroughput, stdDevThroughput));
     }
 
