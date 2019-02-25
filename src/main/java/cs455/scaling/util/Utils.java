@@ -11,7 +11,7 @@ import java.util.Date;
 
 public class Utils {
     public static final int EIGHT_KB = 8129;
-    public static final int HASH_CODE_BYTE_SIZE = 30;
+    public static final int HASH_CODE_BYTE_SIZE = 40;
     public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
     private static boolean debug = true;
 
@@ -36,8 +36,7 @@ public class Utils {
         MessageDigest digest = null;
         try {
             digest = MessageDigest.getInstance("SHA1");
-        }
-        catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         byte[] hash = digest.digest(data);
@@ -66,12 +65,26 @@ public class Utils {
         while (src.hasRemaining()) {
             try {
                 numBytesWritten += socketChannel.write(src);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(-1);
             }
         }
 //        Utils.debug(numBytesWritten);
+    }
+
+    public static String padStringWithZeros(String string, int expectedStringLength) {
+        String paddedString = string;
+        if (paddedString.length() < expectedStringLength) {
+            StringBuilder sb = new StringBuilder(paddedString);
+            while (sb.length() < expectedStringLength)
+                sb.insert(0, "0");
+            paddedString = sb.toString();
+        }
+        return paddedString;
+    }
+
+    public static String padHashCodeWithZeros(String hashCode) {
+        return padStringWithZeros(hashCode, HASH_CODE_BYTE_SIZE);
     }
 }

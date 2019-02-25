@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -68,7 +67,7 @@ public class NioClient implements Runnable {
                 random.nextBytes(randomBytes);
                 String hashCode = Utils.createSha1FromBytes(randomBytes);
                 try {
-                    hashCodes.put(new String(Arrays.copyOfRange(hashCode.getBytes(), 0, Utils.HASH_CODE_BYTE_SIZE)));
+                    hashCodes.put(Utils.padHashCodeWithZeros(hashCode));
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();
