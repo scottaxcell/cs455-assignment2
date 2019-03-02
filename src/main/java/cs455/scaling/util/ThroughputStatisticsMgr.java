@@ -40,7 +40,10 @@ public class ThroughputStatisticsMgr {
         synchronized (numActiveClients) {
             if (numActiveClients.get() == 0)
                 return Double.valueOf(0);
-            double mean = getMeanPerClientThroughput();
+            double sum = 0;
+            for (ThroughputStatistics throughputStatistics : throughputStatisticsList)
+                sum += throughputStatistics.getNumMessages();
+            double mean = (sum / numActiveClients.get());
             double stdDev = 0;
             for (ThroughputStatistics throughputStatistics : throughputStatisticsList)
                 stdDev += Math.pow((throughputStatistics.getNumMessages() - mean), 2);

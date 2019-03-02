@@ -58,21 +58,15 @@ public class Utils {
 
     public static void writeBytesToChannel(SocketChannel socketChannel, byte[] bytes) {
         ByteBuffer src = ByteBuffer.wrap(bytes);
-//        ByteBuffer src = ByteBuffer.allocateDirect(sizeOfBuffer);
-//        src.clear();
-//        src.put(bytes);
-//        src.flip();
-        int numBytesWritten = 0;
         while (src.hasRemaining()) {
             try {
-                numBytesWritten += socketChannel.write(src);
+                socketChannel.write(src);
             }
             catch (IOException e) {
                 e.printStackTrace();
                 System.exit(-1);
             }
         }
-//        Utils.debug(numBytesWritten);
     }
 
     public static String padStringWithZeros(String string, int expectedStringLength) {

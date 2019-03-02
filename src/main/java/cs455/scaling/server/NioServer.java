@@ -44,8 +44,6 @@ public class NioServer implements Runnable {
                         continue;
                     if (selectionKey.isReadable())
                         handleRead(selectionKey);
-                    else if (selectionKey.isWritable())
-                        handleWrite(selectionKey);
                     else if (selectionKey.isAcceptable())
                         handleAccept(selectionKey);
                 }
@@ -57,8 +55,6 @@ public class NioServer implements Runnable {
     }
 
     private void handleAccept(SelectionKey selectionKey) throws IOException {
-//        Utils.debug("Server.handleAccept");
-
         ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectionKey.channel();
         SocketChannel socketChannel = serverSocketChannel.accept();
         socketChannel.configureBlocking(false);
@@ -68,13 +64,7 @@ public class NioServer implements Runnable {
         throughputStatisticsMgr.addThroughputStatistics(throughputStatistics);
     }
 
-    private void handleWrite(SelectionKey selectionKey) {
-//        Utils.debug("Server.handleWrite");
-    }
-
     private void handleRead(SelectionKey selectionKey) {
-//        Utils.debug(String.format("Server.handleRead key = %s", selectionKey));
-//        selectionKey.interestOps(SelectionKey.OP_WRITE);
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
         byte[] bytes = null;
         try {
@@ -85,26 +75,6 @@ public class NioServer implements Runnable {
             System.exit(-1);
         }
         threadPoolMgr.execute(new BatchTask(selectionKey, bytes));
-//        threadPoolMgr.execute(new Task() {
-//            @Override
-//            public void run() {
-//                SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-//                byte[] bytes = null;
-//                try {
-//                    bytes = Utils.readBytesFromChannel(socketChannel, Utils.EIGHT_KB);
-//                }
-//                catch (IOException e) {
-//                    e.printStackTrace();
-//                    System.exit(-1);
-//                }
-//                String hashCode = Utils.createSha1FromBytes(bytes);
-////                Utils.debug(String.format("received hashCode = %s", hashCode));
-//
-//                Utils.writeBytesToChannel(socketChannel, Arrays.copyOfRange(hashCode.getBytes(), 0, Utils.HASH_CODE_BYTE_SIZE));
-//                selectionKey.interestOps(SelectionKey.OP_READ);
-//                super.run();
-//            }
-//        });
     }
 
     private void initServerSocketChannel() {
