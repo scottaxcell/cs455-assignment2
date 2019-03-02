@@ -9,19 +9,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 class BatchJobMgr {
     private final int batchSize;
+    private final int batchTime;
     private final BlockingQueue<BatchJob> batchJobs = new LinkedBlockingQueue<>();
     private AtomicBoolean batchJobReady = new AtomicBoolean(false);
+    private AtomicBoolean batchJobTimerReady = new AtomicBoolean(false);
+    private Timer batchTimer = new Timer(true);
 
     BatchJobMgr(int batchSize, int batchTime) {
         this.batchSize = batchSize;
-        scheduleBatchTimeTimer(batchTime);
+        this.batchTime = batchTime;
     }
 
-    private void scheduleBatchTimeTimer(int batchTime) {
+    private void scheduleBatchTimeTimer() {
         int batchTimeSeconds = batchTime * 1000;
         BatchTimeTimer batchTimeTimer = new BatchTimeTimer();
-        Timer timer = new Timer(true);
-        timer.scheduleAtFixedRate(batchTimeTimer, batchTimeSeconds, batchTimeSeconds);
+        batchTimer.cancel();
+        batchTimer = new Timer(true);
+        batchTimer.schedule(batchTimeTimer, batchTimeSeconds);
     }
 
     void addBatchTask(BatchTask batchTask) {
@@ -55,7 +59,7 @@ class BatchJobMgr {
     }
 
     BatchJob getBatchJob() {
-        while (!batchJobReady.get()) {
+        while (!batchJobReady.get() && !batchJobTimerReady.get()) {
             try {
                 synchronized (this) { // prevents IllegalMonitorStateException
                     wait();
@@ -64,17 +68,29 @@ class BatchJobMgr {
             catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (batchJobs.peek() == null)
+            if (batchJobs.peek() == null) {
                 batchJobReady.set(false);
+                batchJobTimerReady.set(false);
+            }
         }
-        batchJobReady.set(false);
-        return batchJobs.poll();
+
+        BatchJob batchJob = batchJobs.poll();
+
+        if (batchJobReady.get())
+            batchJobReady.set(false);
+
+        if (batchJobTimerReady.get())
+            batchJobTimerReady.set(false);
+
+        scheduleBatchTimeTimer();
+
+        return batchJob;
     }
 
     private class BatchTimeTimer extends TimerTask {
         @Override
         public void run() {
-            batchJobReady.set(true);
+            batchJobTimerReady.set(true);
             synchronized (BatchJobMgr.this) { // prevents IllegalMonitorStateException
                 BatchJobMgr.this.notify();
             }

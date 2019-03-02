@@ -37,22 +37,26 @@ public class ThroughputStatisticsMgr {
     }
 
     private double getStdDevPerClientThroughput() {
-        if (numActiveClients.get() == 0)
-            return Double.valueOf(0);
-        double mean = getMeanPerClientThroughput();
-        double stdDev = 0;
-        for (ThroughputStatistics throughputStatistics : throughputStatisticsList)
-            stdDev += Math.pow((throughputStatistics.getNumMessages() - mean), 2);
-        return Math.sqrt(stdDev / numActiveClients.get()) / THROUGHPUT_STATISTICS_DELAY;
+        synchronized (numActiveClients) {
+            if (numActiveClients.get() == 0)
+                return Double.valueOf(0);
+            double mean = getMeanPerClientThroughput();
+            double stdDev = 0;
+            for (ThroughputStatistics throughputStatistics : throughputStatisticsList)
+                stdDev += Math.pow((throughputStatistics.getNumMessages() - mean), 2);
+            return Math.sqrt(stdDev / numActiveClients.get()) / THROUGHPUT_STATISTICS_DELAY;
+        }
     }
 
     private double getMeanPerClientThroughput() {
-        if (numActiveClients.get() == 0)
-            return Double.valueOf(0);
-        double sum = 0;
-        for (ThroughputStatistics throughputStatistics : throughputStatisticsList)
-            sum += throughputStatistics.getNumMessages();
-        return (sum / numActiveClients.get()) / THROUGHPUT_STATISTICS_DELAY;
+        synchronized (numActiveClients) {
+            if (numActiveClients.get() == 0)
+                return Double.valueOf(0);
+            double sum = 0;
+            for (ThroughputStatistics throughputStatistics : throughputStatisticsList)
+                sum += throughputStatistics.getNumMessages();
+            return (sum / numActiveClients.get()) / THROUGHPUT_STATISTICS_DELAY;
+        }
     }
 
     private int getNumActiveClients() {
