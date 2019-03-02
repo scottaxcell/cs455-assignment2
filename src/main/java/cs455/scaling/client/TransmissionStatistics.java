@@ -1,6 +1,5 @@
 package cs455.scaling.client;
 
-import cs455.scaling.util.ThroughputStatisticsMgr;
 import cs455.scaling.util.Utils;
 
 import java.util.Date;

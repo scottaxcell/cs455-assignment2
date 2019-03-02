@@ -1,7 +1,5 @@
 package cs455.scaling.client;
 
-import cs455.scaling.util.Utils;
-
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 

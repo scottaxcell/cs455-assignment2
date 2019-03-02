@@ -2,8 +2,8 @@ package cs455.scaling.server;
 
 import cs455.scaling.threadpool.BatchTask;
 import cs455.scaling.threadpool.ThreadPoolMgr;
-import cs455.scaling.util.ThroughputStatisticsMgr;
 import cs455.scaling.util.ThroughputStatistics;
+import cs455.scaling.util.ThroughputStatisticsMgr;
 import cs455.scaling.util.Utils;
 
 import java.io.IOException;

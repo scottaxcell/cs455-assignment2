@@ -14,11 +14,11 @@ public class NioClient implements Runnable {
     private final String serverHost;
     private final int serverPort;
     private final int messageRate;
+    private final TransmissionStatistics transmissionStatistics = new TransmissionStatistics();
     private Selector selector;
     private SocketChannel socketChannel;
     private SelectionKey selectionKey;
     private HashCodes hashCodes = new HashCodes();
-    private final TransmissionStatistics transmissionStatistics = new TransmissionStatistics();
 
     public NioClient(String serverHost, int serverPort, int messageRate) {
         this.serverHost = serverHost;

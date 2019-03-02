@@ -36,7 +36,8 @@ public class Utils {
         MessageDigest digest = null;
         try {
             digest = MessageDigest.getInstance("SHA1");
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         byte[] hash = digest.digest(data);
@@ -65,7 +66,8 @@ public class Utils {
         while (src.hasRemaining()) {
             try {
                 numBytesWritten += socketChannel.write(src);
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 e.printStackTrace();
                 System.exit(-1);
             }
