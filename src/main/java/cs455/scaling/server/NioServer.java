@@ -1,6 +1,7 @@
 package cs455.scaling.server;
 
 import cs455.scaling.threadpool.BatchTask;
+import cs455.scaling.threadpool.ReadBatchTask;
 import cs455.scaling.threadpool.ThreadPoolMgr;
 import cs455.scaling.util.ThroughputStatistics;
 import cs455.scaling.util.ThroughputStatisticsMgr;
@@ -65,16 +66,8 @@ public class NioServer implements Runnable {
     }
 
     private void handleRead(SelectionKey selectionKey) {
-        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-        byte[] bytes = null;
-        try {
-            bytes = Utils.readBytesFromChannel(socketChannel, Utils.EIGHT_KB);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
-        threadPoolMgr.execute(new BatchTask(selectionKey, bytes));
+        selectionKey.interestOps(SelectionKey.OP_WRITE);
+        threadPoolMgr.execute(new ReadBatchTask(selectionKey));
     }
 
     private void initServerSocketChannel() {
