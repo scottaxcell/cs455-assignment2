@@ -1,6 +1,6 @@
 package cs455.scaling.server;
 
-import cs455.scaling.threadpool.BatchTask;
+import cs455.scaling.threadpool.AcceptBatchTask;
 import cs455.scaling.threadpool.ReadBatchTask;
 import cs455.scaling.threadpool.ThreadPoolMgr;
 import cs455.scaling.util.ThroughputStatistics;
@@ -13,11 +13,12 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class NioServer implements Runnable {
     private final int port;
+    private final ReentrantLock selectorLock = new ReentrantLock();
     private ServerSocketChannel serverSocketChannel;
     private Selector selector;
     private SelectionKey selectionKey;
@@ -35,7 +36,9 @@ public class NioServer implements Runnable {
         initServerSocketChannel();
         while (true) {
             try {
-                selector.select();
+                selectorLock.lock();
+                selectorLock.unlock();
+                selector.select(500);
 
                 Iterator<SelectionKey> selectionKeyIterator = selector.selectedKeys().iterator();
                 while (selectionKeyIterator.hasNext()) {
@@ -49,20 +52,20 @@ public class NioServer implements Runnable {
                         handleAccept(selectionKey);
                 }
             }
-            catch (IOException e) {
+            catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void handleAccept(SelectionKey selectionKey) throws IOException {
-        ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectionKey.channel();
-        SocketChannel socketChannel = serverSocketChannel.accept();
-        socketChannel.configureBlocking(false);
-        SelectionKey register = socketChannel.register(selector, SelectionKey.OP_READ);
+    private void handleAccept(SelectionKey selectionKey) throws IOException, InterruptedException {
+        if (selectionKey.attachment() != null)
+            return;
+
+        selectionKey.attach(new Integer(42));
         ThroughputStatistics throughputStatistics = new ThroughputStatistics(throughputStatisticsMgr);
-        register.attach(throughputStatistics);
         throughputStatisticsMgr.addThroughputStatistics(throughputStatistics);
+        threadPoolMgr.executeImmediately(new AcceptBatchTask(selectionKey, selector, selectorLock, throughputStatistics));
     }
 
     private void handleRead(SelectionKey selectionKey) {
@@ -74,7 +77,7 @@ public class NioServer implements Runnable {
         try {
             serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.configureBlocking(false);
-            selectionKey = serverSocketChannel.register(selector = Selector.open(), SelectionKey.OP_ACCEPT, null);
+            selectionKey = serverSocketChannel.register(selector = Selector.open(), SelectionKey.OP_ACCEPT);
             serverSocketChannel.socket().bind(new InetSocketAddress(port));
             Utils.info(String.format("Server started %s:%d", InetAddress.getLocalHost().getCanonicalHostName(), port));
         }

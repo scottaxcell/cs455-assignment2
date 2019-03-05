@@ -43,4 +43,12 @@ public class ThreadPoolMgr extends Thread {
     public void execute(BatchTask batchTask) {
         batchJobMgr.addBatchTask(batchTask);
     }
+
+    /**
+     * Executes the given task "immediately"
+     */
+    public void executeImmediately(BatchTask batchTask) throws InterruptedException {
+        Worker worker = getWorker();
+        worker.setJob(batchTask);
+    }
 }
