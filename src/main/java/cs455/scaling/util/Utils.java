@@ -45,11 +45,17 @@ public class Utils {
         return hashInt.toString(16);
     }
 
-    public static byte[] readBytesFromChannel(SocketChannel socketChannel, int sizeOfBuffer) throws IOException {
+    public static byte[] readBytesFromChannel(SocketChannel socketChannel, int sizeOfBuffer) {
         ByteBuffer dst = ByteBuffer.allocateDirect(sizeOfBuffer);
         int numBytesRead = 0;
-        while (dst.hasRemaining() && numBytesRead != -1)
-            numBytesRead = socketChannel.read(dst);
+        while (dst.hasRemaining() && numBytesRead != -1) {
+            try {
+                numBytesRead = socketChannel.read(dst);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
+        }
         dst.flip();
         byte[] bytes = new byte[dst.remaining()];
         dst.get(bytes);

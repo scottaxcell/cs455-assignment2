@@ -16,15 +16,7 @@ public class ReadBatchTask extends BatchTask {
     @Override
     public void run() {
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-        byte[] data = null;
-        try {
-            data = Utils.readBytesFromChannel(socketChannel, Utils.EIGHT_KB);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
-        selectionKey.interestOps(SelectionKey.OP_WRITE);
+        byte[] data = Utils.readBytesFromChannel(socketChannel, Utils.EIGHT_KB);
         String hashCode = Utils.createSha1FromBytes(data);
         Utils.writeBytesToChannel(socketChannel, Utils.padHashCodeWithZeros(hashCode).getBytes());
         selectionKey.interestOps(SelectionKey.OP_READ);
