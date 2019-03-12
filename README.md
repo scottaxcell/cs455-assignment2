@@ -1,7 +1,6 @@
 # cs455-assignment2
 
-SCALABLE SERVER DESIGN: USING THREAD POOLS & MICRO BATCHING TO MANAGE AND LOAD BALANCE
-ACTIVE NETWORK CONNECTIONS
+Scalable Server Design: Using Thread Pools & Micro Batching To Manage And Load Balance Active Network Connections
 
 ## References
 * http://tutorials.jenkov.com/java-nio/selectors.html
